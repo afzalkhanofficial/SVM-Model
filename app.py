@@ -23,7 +23,7 @@ HOG_PARAMS = {
     'block_norm': 'L2-Hys'
 }
 
-# Update model path for SVM (no scaler is used)
+# Update model path for SVM (trained on only HOG features)
 MODEL_PATH = 'oil_spill_svm_model.pkl'
 try:
     svm_model = joblib.load(MODEL_PATH)
@@ -59,9 +59,9 @@ def preprocess_uploaded_image(file_stream):
     - Reads the image (supports all common formats)
     - Resizes it to a fixed size
     - Converts it to grayscale for HOG extraction
-    - Extracts HOG features and computes a color histogram
+    - Extracts HOG features and computes a color histogram (not used for prediction)
     Returns:
-      original image, resized image, grayscale image, hog image, and the combined feature vector.
+      original image, resized image, grayscale image, hog image, and the HOG feature vector.
     """
     img = read_image(file_stream)
     if img is None:
@@ -88,7 +88,8 @@ def preprocess_uploaded_image(file_stream):
         print(f"Error extracting HOG features: {e}")
         return None, None, None, None, None
 
-    # Compute color histogram for each RGB channel (32 bins per channel)
+    # Optionally, if you still want to compute the color histogram for display purposes:
+    # (not used in prediction)
     try:
         hist_r, _ = np.histogram(img_resized[:, :, 0], bins=32, range=(0, 1), density=True)
         hist_g, _ = np.histogram(img_resized[:, :, 1], bins=32, range=(0, 1), density=True)
@@ -98,14 +99,14 @@ def preprocess_uploaded_image(file_stream):
         print(f"Error computing color histogram: {e}")
         color_hist = np.zeros(96)
     
-    # Combine HOG features and color histogram into a single feature vector
-    features = np.concatenate([hog_features, color_hist])
+    # For prediction, use only the HOG features (8100 features)
+    features = hog_features  # Do not concatenate the color histogram
     return img, img_resized, img_gray, hog_image, features
 
 def create_visual_report(original, resized, gray, hog_img, prediction, proba):
     """
-    Generates visual reports: original image, resized image, grayscale, HOG extraction, heatmap, 
-    and a probability bar chart.
+    Generates visual reports: original image, resized image, grayscale, HOG extraction,
+    heatmap, and a probability bar chart.
     Returns a dictionary of base64-encoded images.
     """
     visuals = {}
@@ -250,8 +251,7 @@ def index():
       <h1>SVM Oil Spill Detection</h1>
       <form id="upload-form" action="/predict" method="post" enctype="multipart/form-data">
         <div id="drop-area">
-          <p>Drag & Drop an image or <span class="browse-text">Browse</span>
-          </p>
+          <p>Drag & Drop an image or <span class="browse-text">Browse</span></p>
           <input type="file" id="file-input" name="image" accept="image/*" required hidden>
         </div>
         <div id="preview"></div>
@@ -293,8 +293,7 @@ def index():
             if (file.type.startsWith('image/')) {
               const reader = new FileReader();
               reader.onload = function(e) {
-                preview.innerHTML = `
-						<img src="${e.target.result}" alt="Image preview">`;
+                preview.innerHTML = `<img src="${e.target.result}" alt="Image preview">`;
               };
               reader.readAsDataURL(file);
             } else {
