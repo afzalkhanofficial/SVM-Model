@@ -23,7 +23,7 @@ HOG_PARAMS = {
     'block_norm': 'L2-Hys'
 }
 
-# Update model path for SVM
+# Update model path for SVM (no scaler is used)
 MODEL_PATH = 'oil_spill_svm_model.pkl'
 try:
     svm_model = joblib.load(MODEL_PATH)
@@ -104,7 +104,8 @@ def preprocess_uploaded_image(file_stream):
 
 def create_visual_report(original, resized, gray, hog_img, prediction, proba):
     """
-    Generates visual reports: original image, resized image, grayscale, HOG extraction, heatmap, and a probability bar chart.
+    Generates visual reports: original image, resized image, grayscale, HOG extraction, heatmap, 
+    and a probability bar chart.
     Returns a dictionary of base64-encoded images.
     """
     visuals = {}
@@ -188,7 +189,6 @@ def index():
         align-items: center;
         height: 100vh;
       }
-
       .container {
         background: white;
         padding: 30px;
@@ -198,12 +198,10 @@ def index():
         width: 70%;
         max-width: 400px;
       }
-
       h1 {
         color: #333;
         font-size: 2rem;
       }
-
       #drop-area {
         border: 3px dashed #FFD700;
         padding: 25px;
@@ -211,26 +209,21 @@ def index():
         border-radius: 8px;
         transition: background 0.3s ease-in-out;
       }
-
       #drop-area:hover {
         background: #fffbe8;
       }
-
       #drop-area.pressed {
         background: #e0e0e0;
       }
-
       #preview {
         margin-top: 20px;
         margin-bottom: 20px;
       }
-
       #preview img {
         max-width: 100%;
         max-height: 300px;
         border-radius: 8px;
       }
-
       button {
         background: #FFD700;
         color: white;
@@ -241,11 +234,9 @@ def index():
         cursor: pointer;
         transition: background 0.3s;
       }
-
       button:hover {
         background: #FFA500;
       }
-
       .browse-text {
         color: #FFA500;
         font-weight: bold;
@@ -296,7 +287,6 @@ def index():
         fileInput.addEventListener('change', (e) => {
           handleFiles(e.target.files);
         });
-
         function handleFiles(files) {
           if (files.length > 0) {
             const file = files[0];
