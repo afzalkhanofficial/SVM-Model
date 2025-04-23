@@ -165,10 +165,9 @@ def create_visual_report(original, resized, gray, hog_img, prediction, proba):
     ax_chart.set_title("Prediction Probabilities")
     visuals['prob_chart'] = fig_to_base64(fig_chart)
 
-    visuals['prediction_text'] = (
-        f"Prediction: {'Oil Spill Detected' if prediction == 1 else 'No Oil Spill Detected'}<br>"
-        f"Probabilities: {proba}"
-    )
+    result = "Oil Spill Detected" if prediction == 1 else "No Oil Spill Detected"
+    color = "red" if prediction == 1 else "green"
+    visuals['prediction_text'] = f"<span style='color: {color}; font-weight: bold; font-size: 1.3rem;'>{result}</span>"
     return visuals
 
 @app.route('/', methods=['GET'])
